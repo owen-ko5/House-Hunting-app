@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FourFrame — House Hunting</title>
+<style>
+  :root{
+    --ink:#1C2B3A;
+    --paper:#F7F4EC;
+    --blueprint:#1C2B3A;
+    --line:#7C97AC;
+    --line-soft:#3C526640;
+    --clay:#C0693A;
+    --clay-dark:#9A4E29;
+    --ok:#3E7A4E;
+    --err:#B23A34;
+    --radius:2px;
+    --display: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.5;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    background:var(--blueprint);
+    color:var(--paper);
+    padding:18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    border-bottom:3px solid var(--clay);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand svg{flex-shrink:0;}
+  .brand-text{
+    font-family:var(--display);
+    font-size:22px;
+    letter-spacing:0.5px;
+  }
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--line);
+    display:block;
+    margin-top:-2px;
+  }
+  nav{display:flex; gap:4px; align-items:center; flex-wrap:wrap;}
+  nav button{
+    background:transparent;
+    border:1px solid transparent;
+    color:var(--paper);
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:8px 14px;
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  nav button:hover{border-color:var(--line);}
+  nav button.active{background:var(--clay); color:var(--paper);}
+  nav .who{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--line);
+    margin-right:8px;
+  }
+
+  main{max-width:1080px; margin:0 auto; padding:32px 24px 80px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:flex;
+    align-items:center;
+    gap:36px;
+    padding:28px 8px 40px;
+    border-bottom:1px dashed var(--line-soft);
+    margin-bottom:32px;
+    flex-wrap:wrap;
+  }
+  .hero h1{
+    font-family:var(--display);
+    font-size:38px;
+    margin:0 0 10px;
+    max-width:520px;
+  }
+  .hero p{max-width:460px; color:#3c5266; margin:0;}
+  .hero svg{width:180px; height:180px; flex-shrink:0;}
+
+  /* ---------- panels ---------- */
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  h2.section-title{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--clay-dark);
+    margin:0 0 18px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line-soft);
+  }
+
+  /* ---------- forms ---------- */
+  .card{
+    background:#fff;
+    border:1px solid var(--line-soft);
+    border-radius:var(--radius);
+    padding:28px;
+    max-width:440px;
+  }
+  .card.wide{max-width:720px;}
+  form label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#5a6f80;
+    margin:14px 0 6px;
+  }
+  form label:first-child{margin-top:0;}
+  input, textarea, select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #c8d0d6;
+    border-radius:var(--radius);
+    font-family:var(--body);
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:2px solid var(--clay);
+    outline-offset:1px;
+  }
+  textarea{resize:vertical; min-height:80px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+
+  button.primary{
+    margin-top:22px;
+    width:100%;
+    background:var(--clay);
+    color:#fff;
+    border:none;
+    padding:12px 16px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  button.primary:hover{background:var(--clay-dark);}
+  button.primary:disabled{background:#a9a49a; cursor:not-allowed;}
+
+  .switch-link{
+    margin-top:16px;
+    font-size:13px;
+    color:#5a6f80;
+  }
+  .switch-link a{color:var(--clay-dark); cursor:pointer; text-decoration:underline;}
+
+  .msg{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:10px 12px;
+    border-radius:var(--radius);
+    margin-bottom:16px;
+  }
+  .msg.err{background:#B23A3418; color:var(--err); border:1px solid #B23A3440;}
+  .msg.ok{background:#3E7A4E18; color:var(--ok); border:1px solid #3E7A4E40;}
+
+  /* ---------- listings ---------- */
+  .filters{
+    display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;
+    align-items:flex-end;
+  }
+  .filters div{display:flex; flex-direction:column; gap:4px;}
+  .filters label{font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#5a6f80;}
+  .filters input, .filters select{padding:8px 10px; font-size:13px; width:150px;}
+  .filters button{
+    background:var(--blueprint); color:#fff; border:none; padding:9px 16px;
+    font-family:var(--mono); font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    cursor:pointer; border-radius:var(--radius);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:20px;
+  }
+  .house-card{
+    background:#fff;
+    border:1px solid var(--line-soft);
+    border-radius:var(--radius);
+    overflow:hidden;
+    position:relative;
+    display:flex; flex-direction:column;
+  }
+  .house-card .img{
+    height:150px;
+    background:var(--blueprint) center/cover no-repeat;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--line);
+  }
+  .house-card .img svg{width:60px; height:60px; opacity:0.5;}
+  .price-tag{
+    position:absolute; top:10px; right:0;
+    background:var(--clay); color:#fff;
+    font-family:var(--mono); font-size:12px; font-weight:bold;
+    padding:5px 10px 5px 14px;
+  }
+  .house-card .body{padding:16px; flex:1; display:flex; flex-direction:column;}
+  .house-card h3{font-family:var(--display); font-size:18px; margin:0 0 4px;}
+  .house-card .loc{font-family:var(--mono); font-size:11px; color:var(--clay-dark); letter-spacing:0.5px; margin-bottom:10px;}
+  .house-card p.desc{font-size:13px; color:#3c5266; flex:1; margin:0 0 12px;}
+  .spec-row{
+    display:flex; gap:14px; font-family:var(--mono); font-size:11px; color:#5a6f80;
+    border-top:1px dashed var(--line-soft); padding-top:10px;
+  }
+  .listing-type-badge{
+    display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:1px;
+    text-transform:uppercase; padding:2px 8px; border:1px solid var(--line-soft); border-radius:12px;
+    color:#5a6f80; margin-bottom:8px;
+  }
+  .owner-actions{display:flex; gap:8px; margin-top:12px;}
+  .owner-actions button{
+    flex:1; font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    padding:6px 8px; cursor:pointer; border-radius:var(--radius);
+  }
+  .owner-actions .del{background:#fff; border:1px solid var(--err); color:var(--err);}
+  .owner-actions .del:hover{background:var(--err); color:#fff;}
+
+  .empty-state{
+    font-family:var(--mono); font-size:13px; color:#5a6f80;
+    padding:40px 20px; text-align:center; border:1px dashed var(--line-soft);
+  }
+
+  footer{
+    text-align:center; padding:24px; font-family:var(--mono); font-size:11px;
+    color:#8496a4; border-top:1px dashed var(--line-soft);
+  }
+
+  @media (max-width:600px){
+    .hero{flex-direction:column; text-align:center;}
+    .row2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <path d="M4 17L17 6L30 17" stroke="#F7F4EC" stroke-width="2"/>
+      <path d="M8 15V28H26V15" stroke="#F7F4EC" stroke-width="2"/>
+      <rect x="15" y="20" width="4" height="8" fill="#C0693A"/>
+    </svg>
+    <div>
+      <div class="brand-text">FourFrame</div>
+      <span class="brand-sub">house hunting</span>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-panel="browse" class="active">Browse</button>
+    <button data-panel="login" id="nav-login">Login</button>
+    <button data-panel="register" id="nav-register">Register</button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero" id="hero">
+    <div>
+      <h1>Find your next four walls.</h1>
+      <p>Browse verified listings from real owners, or register as an owner to post your own house for rent or sale in minutes.</p>
+    </div>
+    <svg viewBox="0 0 160 160" fill="none">
+      <path d="M20 80L80 30L140 80" stroke="#1C2B3A" stroke-width="2.5"/>
+      <path d="M35 70V135H125V70" stroke="#1C2B3A" stroke-width="2.5"/>
+      <rect x="70" y="95" width="20" height="40" fill="#C0693A"/>
+      <rect x="45" y="90" width="16" height="16" stroke="#1C2B3A" stroke-width="2"/>
+      <rect x="99" y="90" width="16" height="16" stroke="#1C2B3A" stroke-width="2"/>
+      <line x1="10" y1="135" x2="150" y2="135" stroke="#7C97AC" stroke-width="1.5" stroke-dasharray="3 3"/>
+    </svg>
+  </section>
+
+  <!-- ===================== BROWSE ===================== -->
+  <section class="panel active" id="panel-browse">
+    <h2 class="section-title">Available listings</h2>
+
+    <div class="filters">
+      <div>
+        <label>Location</label>
+        <input type="text" id="f-location" placeholder="e.g. Abu Dhabi" />
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="f-type">
+          <option value="">Any</option>
+          <option value="rent">For Rent</option>
+          <option value="sale">For Sale</option>
+        </select>
+      </div>
+      <div>
+        <label>Min Price</label>
+        <input type="number" id="f-min" placeholder="0" />
+      </div>
+      <div>
+        <label>Max Price</label>
+        <input type="number" id="f-max" placeholder="Any" />
+      </div>
+      <button onclick="loadHouses()">Filter</button>
+    </div>
+
+    <div id="browse-msg"></div>
+    <div class="grid" id="house-grid"></div>
+  </section>
+
+  <!-- ===================== LOGIN ===================== -->
+  <section class="panel" id="panel-login">
+    <h2 class="section-title">Login</h2>
+    <div class="card">
+      <div id="login-msg"></div>
+      <form id="login-form">
+        <label>Email</label>
+        <input type="email" id="login-email" required />
+        <label>Password</label>
+        <input type="password" id="login-password" required />
+        <button class="primary" type="submit">Log in</button>
+      </form>
+      <div class="switch-link">No account yet? <a onclick="showPanel('register')">Register here</a></div>
+    </div>
+  </section>
+
+  <!-- ===================== REGISTER ===================== -->
+  <section class="panel" id="panel-register">
+    <h2 class="section-title">Register</h2>
+    <div class="card">
+      <div id="register-msg"></div>
+      <form id="register-form">
+        <label>Username</label>
+        <input type="text" id="reg-username" required minlength="3" />
+        <label>Email</label>
+        <input type="email" id="reg-email" required />
+        <label>Password</label>
+        <input type="password" id="reg-password" required minlength="8" />
+        <button class="primary" type="submit">Create account</button>
+      </form>
+      <div class="switch-link">Already registered? <a onclick="showPanel('login')">Log in</a></div>
+    </div>
+  </section>
+
+  <!-- ===================== POST A HOUSE ===================== -->
+  <section class="panel" id="panel-post">
+    <h2 class="section-title">Post a house</h2>
+    <div class="card wide">
+      <div id="post-msg"></div>
+      <form id="post-form">
+        <label>Title</label>
+        <input type="text" id="p-title" required minlength="3" placeholder="e.g. 3-Bed Villa with Garden" />
+
+        <label>Description</label>
+        <textarea id="p-description" placeholder="Describe the house..."></textarea>
+
+        <div class="row2">
+          <div>
+            <label>Price</label>
+            <input type="number" id="p-price" required min="1" placeholder="e.g. 85000" />
+          </div>
+          <div>
+            <label>Listing type</label>
+            <select id="p-listing-type">
+              <option value="rent">For Rent</option>
+              <option value="sale">For Sale</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Location</label>
+        <input type="text" id="p-location" required placeholder="e.g. Al Reem Island, Abu Dhabi" />
+
+        <div class="row2">
+          <div>
+            <label>Bedrooms</label>
+            <input type="number" id="p-bedrooms" min="0" />
+          </div>
+          <div>
+            <label>Bathrooms</label>
+            <input type="number" id="p-bathrooms" min="0" />
+          </div>
+        </div>
+
+        <label>House type</label>
+        <input type="text" id="p-house-type" placeholder="e.g. Apartment, Villa, Duplex" />
+
+        <label>Image URL (optional)</label>
+        <input type="url" id="p-image" placeholder="https://..." />
+
+        <label>Contact phone</label>
+        <input type="text" id="p-phone" placeholder="e.g. +971 5x xxx xxxx" />
+
+        <button class="primary" type="submit">Post house</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== MY LISTINGS ===================== -->
+  <section class="panel" id="panel-mine">
+    <h2 class="section-title">My listings</h2>
+    <div id="mine-msg"></div>
+    <div class="grid" id="mine-grid"></div>
+  </section>
+
+</main>
+
+<footer>FourFrame · demo API base: <span id="api-base-label"></span></footer>
+
+<script>
+/* ============================================================
+   Config — point this at your running Flask backend.
+   Change API_BASE if your backend isn't on localhost:5000.
+============================================================ */
+const API_BASE = (localStorage.getItem && false) ? '' : 'http://localhost:5000/api';
+// Token kept in memory only for this page session.
+let AUTH = { access: null, refresh: null, user: null };
+
+document.getElementById('api-base-label').textContent = API_BASE;
+
+/* ---------------- navigation ---------------- */
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('#nav button[data-panel]').forEach(b => b.classList.remove('active'));
+  const navBtn = document.querySelector(`#nav button[data-panel="${name}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  if (name === 'mine') loadMine();
+  if (name === 'browse') loadHouses();
+}
+document.querySelectorAll('#nav button[data-panel]').forEach(btn=>{
+  btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+});
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  if (AUTH.access){
+    nav.innerHTML = `
+      <span class="who">Signed in as ${AUTH.user.username}</span>
+      <button data-panel="browse">Browse</button>
+      <button data-panel="post">Post a house</button>
+      <button data-panel="mine">My listings</button>
+      <button id="logout-btn">Logout</button>
+    `;
+  } else {
+    nav.innerHTML = `
+      <button data-panel="browse">Browse</button>
+      <button data-panel="login">Login</button>
+      <button data-panel="register">Register</button>
+    `;
+  }
+  nav.querySelectorAll('button[data-panel]').forEach(btn=>{
+    btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+  });
+  const lo = document.getElementById('logout-btn');
+  if (lo) lo.addEventListener('click', logout);
+}
+renderNav();
+
+/* ---------------- helpers ---------------- */
+function showMsg(id, text, ok){
+  const el = document.getElementById(id);
+  el.innerHTML = text ? `<div class="msg ${ok ? 'ok':'err'}">${text}</div>` : '';
+}
+
+async function api(path, options = {}){
+  const headers = Object.assign({'Content-Type':'application/json'}, options.headers || {});
+  if (AUTH.access) headers['Authorization'] = 'Bearer ' + AUTH.access;
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if (!res.ok) {
+    const err = new Error((data && (data.error || JSON.stringify(data.errors))) || 'Request failed');
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
+}
+
+/* ---------------- register ---------------- */
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg('register-msg', '');
+  const username = document.getElementById('reg-username').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+  try {
+    const data = await api('/register', { method:'POST', body: JSON.stringify({ username, email, password }) });
+    AUTH.access = data.access_token;
+    AUTH.refresh = data.refresh_token;
+    AUTH.user = data.user;
+    renderNav();
+    showPanel('post');
+  } catch(err){
+    showMsg('register-msg', err.message, false);
+  }
+});
+
+/* ---------------- login ---------------- */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg('login-msg', '');
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  try {
+    const data = await api('/login', { method:'POST', body: JSON.stringify({ email, password }) });
+    AUTH.access = data.access_token;
+    AUTH.refresh = data.refresh_token;
+    AUTH.user = data.user;
+    renderNav();
+    showPanel('browse');
+  } catch(err){
+    showMsg('login-msg', err.message, false);
+  }
+});
+
+function logout(){
+  api('/logout', { method:'POST', body: JSON.stringify({ refresh_token: AUTH.refresh }) }).catch(()=>{});
+  AUTH = { access:null, refresh:null, user:null };
+  renderNav();
+  showPanel('browse');
+}
+
+/* ---------------- browse houses ---------------- */
+function houseCardHTML(h, mine){
+  const specs = [];
+  if (h.bedrooms != null) specs.push(h.bedrooms + ' bd');
+  if (h.bathrooms != null) specs.push(h.bathrooms + ' ba');
+  if (h.house_type) specs.push(h.house_type);
+
+  const img = h.image_url
+    ? `<div class="img" style="background-image:url('${h.image_url.replace(/'/g,"")}')"></div>`
+    : `<div class="img"><svg viewBox="0 0 60 60" fill="none"><path d="M6 30L30 12L54 30" stroke="#7C97AC" stroke-width="2"/><path d="M12 26V50H48V26" stroke="#7C97AC" stroke-width="2"/></svg></div>`;
+
+  return `
+    <div class="house-card">
+      ${img}
+      <div class="price-tag">$${Number(h.price).toLocaleString()}${h.listing_type==='rent' ? '/mo' : ''}</div>
+      <div class="body">
+        <span class="listing-type-badge">${h.listing_type === 'sale' ? 'For Sale' : 'For Rent'}</span>
+        <h3>${escapeHtml(h.title)}</h3>
+        <div class="loc">${escapeHtml(h.location)}</div>
+        <p class="desc">${escapeHtml(h.description || 'No description provided.')}</p>
+        <div class="spec-row">${specs.map(s=>`<span>${escapeHtml(String(s))}</span>`).join('<span>·</span>')}</div>
+        ${h.contact_phone ? `<div class="spec-row" style="border-top:none; padding-top:6px;">Contact: ${escapeHtml(h.contact_phone)}</div>` : ''}
+        ${mine ? `<div class="owner-actions">
+            <button class="del" onclick="deleteHouse(${h.id})">Delete</button>
+          </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function loadHouses(){
+  showMsg('browse-msg', '');
+  const grid = document.getElementById('house-grid');
+  grid.innerHTML = '<div class="empty-state">Loading listings…</div>';
+  const params = new URLSearchParams();
+  const location = document.getElementById('f-location').value.trim();
+  const type = document.getElementById('f-type').value;
+  const min = document.getElementById('f-min').value;
+  const max = document.getElementById('f-max').value;
+  if (location) params.set('location', location);
+  if (type) params.set('listing_type', type);
+  if (min) params.set('min_price', min);
+  if (max) params.set('max_price', max);
+
+  try {
+    const houses = await api('/houses?' + params.toString());
+    if (!houses.length){
+      grid.innerHTML = '<div class="empty-state">No listings match yet. Be the first to post one!</div>';
+      return;
+    }
+    grid.innerHTML = houses.map(h => houseCardHTML(h, false)).join('');
+  } catch(err){
+    grid.innerHTML = '';
+    showMsg('browse-msg', 'Could not load listings — is the backend running at ' + API_BASE + '?', false);
+  }
+}
+
+/* ---------------- post a house ---------------- */
+document.getElementById('post-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg('post-msg', '');
+  if (!AUTH.access){
+    showMsg('post-msg', 'Please log in first.', false);
+    showPanel('login');
+    return;
+  }
+  const payload = {
+    title: document.getElementById('p-title').value,
+    description: document.getElementById('p-description').value,
+    price: document.getElementById('p-price').value,
+    listing_type: document.getElementById('p-listing-type').value,
+    location: document.getElementById('p-location').value,
+    bedrooms: document.getElementById('p-bedrooms').value || null,
+    bathrooms: document.getElementById('p-bathrooms').value || null,
+    house_type: document.getElementById('p-house-type').value,
+    image_url: document.getElementById('p-image').value,
+    contact_phone: document.getElementById('p-phone').value,
+  };
+  try {
+    await api('/houses', { method:'POST', body: JSON.stringify(payload) });
+    showMsg('post-msg', 'House posted successfully.', true);
+    document.getElementById('post-form').reset();
+    showPanel('mine');
+  } catch(err){
+    showMsg('post-msg', err.message, false);
+  }
+});
+
+/* ---------------- my listings ---------------- */
+async function loadMine(){
+  showMsg('mine-msg', '');
+  const grid = document.getElementById('mine-grid');
+  if (!AUTH.access){
+    grid.innerHTML = '';
+    showMsg('mine-msg', 'Please log in to see your listings.', false);
+    showPanel('login');
+    return;
+  }
+  grid.innerHTML = '<div class="empty-state">Loading…</div>';
+  try {
+    const houses = await api('/houses/mine');
+    if (!houses.length){
+      grid.innerHTML = '<div class="empty-state">You haven\'t posted a house yet.</div>';
+      return;
+    }
+    grid.innerHTML = houses.map(h => houseCardHTML(h, true)).join('');
+  } catch(err){
+    grid.innerHTML = '';
+    showMsg('mine-msg', err.message, false);
+  }
+}
+
+async function deleteHouse(id){
+  if (!confirm('Delete this listing?')) return;
+  try {
+    await api('/houses/' + id, { method:'DELETE' });
+    loadMine();
+  } catch(err){
+    showMsg('mine-msg', err.message, false);
+  }
+}
+
+/* ---------------- init ---------------- */
+loadHouses();
+</script>
+
+</body>
+</html>
