@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fourframe
+      POSTGRES_PASSWORD: fourframe
+      POSTGRES_DB: fourframe
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fourframe"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./project
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://fourframe:fourframe@db:5432/fourframe
+      JWT_SECRET_KEY: local-dev-secret-change-me
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: python:3.12-slim
+    working_dir: /site
+    volumes:
+      - ./frontend:/site
+    ports:
+      - "3000:3000"
+    command: ["python3", "-m", "http.server", "3000"]
+
+volumes:
+  db_data:
